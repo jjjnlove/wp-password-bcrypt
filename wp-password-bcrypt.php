@@ -10,6 +10,7 @@
  */
 
 const WP_OLD_HASH_PREFIX = '$P$';
+const WP_OLD_HASH_PREFIX2= '*';
 
 /**
  * Check if user has entered correct password, supports bcrypt and pHash.
@@ -37,6 +38,17 @@ function wp_check_password($password, $hash, $userId = '')
         if ($check && $userId) {
             $hash = wp_set_password($password, $userId);
         }
+    }
+    else if (strpos($hash, WP_OLD_HASH_PREFIX2) === 0) {
+	
+        $hashed = strtoupper(sha1(sha1($password, true)));
+        $hashed = "*" . $hashed;
+
+        if (strcmp($hash, $hashed) === 0) {
+            if ($userId) {
+                $hash = wp_set_password($password, $userId);
+            }
+        }	
     }
 
     $check = password_verify($password, $hash);
